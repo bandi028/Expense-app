@@ -64,6 +64,26 @@ app.use('/api/profile', profileRoutes);
 // Health check
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', ts: new Date() }));
 
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Serve frontend in production
+if (process.env.NODE_ENV === 'production') {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+
+  // Resolve path to the client build directory
+  const rootDir = path.resolve(__dirname, '../../');
+  const clientDist = path.join(rootDir, 'client', 'dist');
+
+  app.use(express.static(clientDist));
+
+  // Catch-all route to serve React app for unresolved API routes
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(clientDist, 'index.html'));
+  });
+}
+
 // Error handler
 app.use(errorHandler);
 
