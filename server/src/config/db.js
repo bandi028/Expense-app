@@ -7,6 +7,8 @@ const connectDB = async () => {
             await mongoose.connect(process.env.MONGODB_URI, {
                 serverSelectionTimeoutMS: 5000,
                 socketTimeoutMS: 45000,
+                bufferCommands: false, // Turn off buffering so queries fail immediately if DB disconnected
+                autoCreate: false,
             });
             console.log('✅ MongoDB connected');
             break;
