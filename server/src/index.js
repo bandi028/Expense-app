@@ -46,7 +46,15 @@ app.set('trust proxy', 1);
 // Middleware
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(cors({
-  origin: process.env.CLIENT_URL || (process.env.NODE_ENV === 'production' ? true : 'http://localhost:5173'),
+  origin: (origin, callback) => {
+    // In production monorepo, origin is often undefined (same domain) or matches the host.
+    // If undefined or matching production CLIENT_URL, allow it.
+    if (!origin || (process.env.CLIENT_URL && origin === process.env.CLIENT_URL) || process.env.NODE_ENV === 'production') {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
