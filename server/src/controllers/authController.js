@@ -46,7 +46,7 @@ export const register = async (req, res, next) => {
         });
 
         const otp = await createOrReplaceOTP(identifier, type, 'register');
-        await deliverOTP(type, identifier, otp);
+        deliverOTP(type, identifier, otp).catch(() => { });
 
         res.status(201).json({ message: 'OTP sent. Verify to complete registration', type, identifier });
     } catch (err) {
@@ -60,7 +60,7 @@ export const sendOTP = async (req, res, next) => {
         const { identifier, purpose } = req.body;
         const type = isEmail(identifier) ? 'email' : 'phone';
         const otp = await createOrReplaceOTP(identifier, type, purpose || 'login');
-        await deliverOTP(type, identifier, otp);
+        deliverOTP(type, identifier, otp).catch(() => { });
         res.json({ message: 'OTP sent', type });
     } catch (err) {
         next(err);
@@ -118,7 +118,7 @@ export const login = async (req, res, next) => {
 
         if (!isTrusted) {
             const otp = await createOrReplaceOTP(identifier, type, 'login');
-            await deliverOTP(type, identifier, otp);
+            deliverOTP(type, identifier, otp).catch(() => { });
             return res.json({ message: 'OTP sent for verification', requiresOTP: true, type, identifier });
         }
 
@@ -182,13 +182,12 @@ export const forgotPassword = async (req, res, next) => {
         if (!user) return res.json({ message: 'If this account exists, an OTP has been sent' });
 
         const otp = await createOrReplaceOTP(identifier, type, 'forgot-password');
-        if (type === 'phone') await deliverOTP('phone', identifier, otp);
+        if (type === 'phone') deliverOTP('phone', identifier, otp).catch(() => { });
         else {
-            try { await sendPasswordResetEmail(identifier, otp); }
-            catch (err) {
-                if (process.env.NODE_ENV !== 'production') console.warn(`⚠️  Reset email failed. DEV OTP for ${identifier}: \x1b[33m${otp}\x1b[0m`);
-                else throw err;
-            }
+            sendPasswordResetEmail(identifier, otp).catch((err) => {
+                console.warn(`⚠️  Reset email failed (${err.message}).`);
+                console.warn(`[FALLBACK OTP FOR ${identifier}]: \x1b[31merror delivery\x1b[0m \x1b[32m${otp}\x1b[0m`);
+            });
         }
 
         res.json({ message: 'OTP sent for password reset', type });
