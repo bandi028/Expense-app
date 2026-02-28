@@ -40,6 +40,9 @@ connectDB();
 // Passport config
 configurePassport();
 
+// Trust proxy is required for Render so it registers HTTPS cookies properly
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(cors({

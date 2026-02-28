@@ -32,16 +32,18 @@ export const issueTokens = (res, userId) => {
         expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || '7d',
     });
 
+    const isProduction = process.env.NODE_ENV === 'production';
+
     res.cookie('accessToken', accessToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: isProduction,
+        sameSite: isProduction ? 'strict' : 'lax', // Use strict since the frontend and backend are hosted on the same domain
         maxAge: 15 * 60 * 1000,
     });
     res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: isProduction,
+        sameSite: isProduction ? 'strict' : 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
