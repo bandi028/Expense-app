@@ -7,9 +7,9 @@ import { otpSendLimiter, otpVerifyLimiter, loginLimiter } from '../middleware/ra
 const router = express.Router();
 
 router.post('/register', auth.register);
-router.post('/send-otp', otpSendLimiter, auth.sendOTP);
-router.post('/verify-otp', otpVerifyLimiter, auth.verifyOTP);
-router.post('/login', loginLimiter, auth.login);
+router.post('/send-otp', auth.sendOTP);
+router.post('/verify-otp', auth.verifyOTP);
+router.post('/login', auth.login);
 router.post('/refresh', auth.refreshToken);
 router.post('/logout', auth.logout);
 router.post('/forgot-password', auth.forgotPassword);
