@@ -4,7 +4,10 @@ const connectDB = async () => {
     let retries = 5;
     while (retries) {
         try {
-            await mongoose.connect(process.env.MONGODB_URI);
+            await mongoose.connect(process.env.MONGODB_URI, {
+                serverSelectionTimeoutMS: 5000,
+                socketTimeoutMS: 45000,
+            });
             console.log('✅ MongoDB connected');
             break;
         } catch (err) {
@@ -15,5 +18,13 @@ const connectDB = async () => {
         }
     }
 };
+
+mongoose.connection.on('error', (err) => {
+    console.error('⚠️ MongoDB connection error explicitly fired:', err.message);
+});
+
+mongoose.connection.on('disconnected', () => {
+    console.warn('⚠️ MongoDB gracefully disconnected from cluster.');
+});
 
 export default connectDB;
