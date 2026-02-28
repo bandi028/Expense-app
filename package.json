@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "Root configuration to run client and server concurrently",
     "scripts": {
-        "start": "npm run start --prefix server",
+        "start": "NODE_ENV=production npm run start --prefix server",
         "server": "npm run dev --prefix server",
         "client": "npm run dev --prefix client",
         "dev": "concurrently \"npm run server\" \"npm run client\"",
