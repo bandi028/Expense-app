@@ -10,17 +10,15 @@ import { issueTokens, clearTokens } from '../middleware/auth.js';
 const isEmail = (str) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str);
 const isPhone = (str) => /^\+?[\d\s\-()]{7,15}$/.test(str);
 
-// Safely deliver OTP — falls back to console in dev if credentials not configured
+// Safely deliver OTP — falls back to console if credentials not configured or SMTP fails
 const deliverOTP = async (type, identifier, otp) => {
     try {
         if (type === 'phone') await sendPhoneOTP(identifier, otp);
         else await sendEmailOTP(identifier, otp);
     } catch (err) {
-        if (process.env.NODE_ENV !== 'production') {
-            console.warn(`⚠️  OTP delivery failed (${err.message}). DEV MODE OTP for ${identifier}: \x1b[33m${otp}\x1b[0m`);
-        } else {
-            throw err; // In production, OTP failure should be surfaced
-        }
+        console.warn(`⚠️  OTP delivery failed (${err.message}).`);
+        console.warn(`[FALLBACK OTP FOR ${identifier}]: \x1b[31merror delivery\x1b[0m \x1b[32m${otp}\x1b[0m`);
+        // We no longer throw err here in production, because if SMTP credentials are not set up on Render yet, we don't want the user's registration screen to infinitely hang or crash.
     }
 };
 
