@@ -2,6 +2,7 @@ import { getTransporter } from '../config/mailer.js';
 
 export const sendEmailOTP = async (email, otp) => {
   const transporter = getTransporter();
+
   await transporter.sendMail({
     from: `"Expense Tracker" <${process.env.EMAIL_FROM}>`,
     to: email,

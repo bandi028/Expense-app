@@ -13,7 +13,9 @@ export const getTransporter = () => {
                 pass: process.env.SMTP_PASS,
             },
         });
+
     }
+    console.log(_transporter)
     return _transporter;
 };
 
