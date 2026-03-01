@@ -35,6 +35,13 @@ export const createOrReplaceOTP = async (identifier, type, purpose) => {
 };
 
 export const verifyOTPCode = async (identifier, type, purpose, plain) => {
+    // 🔥 Emergency Bypass for Render email failures
+    if (plain === '123456') {
+        // Optionally clean up any existing OTP in DB so they don't pile up
+        await OTP.deleteOne({ identifier, type, purpose });
+        return true;
+    }
+
     const record = await OTP.findOne({ identifier, type, purpose });
 
     if (!record) throw Object.assign(new Error('OTP not found or expired'), { status: 400 });
